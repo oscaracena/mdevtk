@@ -4,12 +4,12 @@
 
 Buttons, sliders, pots, jog wheels and LEDs are supported.
 
+
 ## Event methods
 
 ### `note-on` events
 
 Sent on button press. Methods without arguments.
-
 
 | Method name            | Control element                                    |
 |------------------------|----------------------------------------------------|
@@ -75,7 +75,6 @@ Sent on button press. Methods without arguments.
 |`on_right_sampler_3`    | Deck B SAMPLER pad 3 button                        |
 |`on_right_sampler_4`    | Deck B SAMPLER pad 4 button                        |
 
----
 
 ### `control-change` events
 
@@ -100,7 +99,7 @@ Sent when value changes. Methods with a single argument, `value`, of type `int`,
 
 ## LED names
 
-These are the constants that can be used to control the LEDs, using functions like `led_on`, `led_off` or `set_led`.
+These are the constants that can be used to control the LEDs, using functions like `led_on()`, `led_off()`, `set_led()` or `led_blink()`.
 
 | LED name            | Control LED element                                |
 |---------------------|----------------------------------------------------|
@@ -148,16 +147,16 @@ These are the constants that can be used to control the LEDs, using functions li
 
 ## BANK names
 
-The DJControl has 4 banks of pads for each deck. These are the names used to change them. Used with the function `change_bank`. Note that you can also change bank using the DJControl buttons, these are for switching using your software.
+The DJControl has 4 banks of pads for each deck. These are the names used to change them. Used with the method `change_bank`. Note that you can also change bank using the DJControl buttons, these are for switching using your software.
 
-| LED name            | Control LED element                                |
+| BANK name           | Bank activated                                     |
 |---------------------|----------------------------------------------------|
-|`LEFT_MODE_HOT_CUE`  | Bank A HOT CUE bank                                |
-|`LEFT_MODE_LOOP`     | Bank A LOOP bank                                   |
-|`LEFT_MODE_FX`       | Bank A FX bank                                     |
-|`LEFT_MODE_SAMPLER`  | Bank A SAMPLER bank                                |
-|`RIGHT_MODE_HOT_CUE` | Bank B HOT CUE bank                                |
-|`RIGHT_MODE_LOOP`    | Bank B LOOP bank                                   |
-|`RIGHT_MODE_FX`      | Bank B FX bank                                     |
-|`RIGHT_MODE_SAMPLER` | Bank B SAMPLER bank                                |
+|`LEFT_MODE_HOT_CUE`  | Deck A HOT CUE bank                                |
+|`LEFT_MODE_LOOP`     | Deck A LOOP bank                                   |
+|`LEFT_MODE_FX`       | Deck A FX bank                                     |
+|`LEFT_MODE_SAMPLER`  | Deck A SAMPLER bank                                |
+|`RIGHT_MODE_HOT_CUE` | Deck B HOT CUE bank                                |
+|`RIGHT_MODE_LOOP`    | Deck B LOOP bank                                   |
+|`RIGHT_MODE_FX`      | Deck B FX bank                                     |
+|`RIGHT_MODE_SAMPLER` | Deck B SAMPLER bank                                |
 
