@@ -52,9 +52,10 @@ class CCCallback:
 
 
 class DeviceController:
-    # LED commands, overwrite in derived controller if different
-    CMD_LED_ON  = 0x01
-    CMD_LED_OFF = 0x00
+    # Control commands, overwrite in derived controller if different
+    CMD_LED_ON   = 0x01
+    CMD_LED_OFF  = 0x00
+    CMD_CHANGE_BANK = 0x01
 
     def __init__(self, dev_id):
         self._mapping = {}
@@ -81,7 +82,14 @@ class DeviceController:
     def set_led(self, led_id, status):
         channel, note = led_id
         cmd = self.CMD_LED_ON if status else self.CMD_LED_OFF
-        msg = mido.Message(type="note_on", channel=channel, note=note, velocity=cmd)
+        msg = mido.Message(type="note_on", channel=channel, note=note,
+            velocity=cmd)
+        self._port.send(msg)
+
+    def change_bank(self, msg):
+        channel, note = msg
+        msg = mido.Message(type="note_on", channel=channel, note=note,
+            velocity=self.CMD_CHANGE_BANK)
         self._port.send(msg)
 
     def on_note(self, channel, note, cb):

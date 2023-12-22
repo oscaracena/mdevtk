@@ -45,29 +45,100 @@ class MyDJControl(DJControlStarlight):
         self.toggle_led(self.RIGHT_HEADPHONES)
 
     def on_left_hot_cue_1(self):
-        self.toggle_led(self.LEFT_PAD_1)
+        self.toggle_led(self.LEFT_HOT_CUE_1)
 
     def on_left_hot_cue_2(self):
-        self.toggle_led(self.LEFT_PAD_2)
+        self.toggle_led(self.LEFT_HOT_CUE_2)
 
     def on_left_hot_cue_3(self):
-        self.toggle_led(self.LEFT_PAD_3)
+        self.toggle_led(self.LEFT_HOT_CUE_3)
 
     def on_left_hot_cue_4(self):
-        self.toggle_led(self.LEFT_PAD_4)
+        self.toggle_led(self.LEFT_HOT_CUE_4)
+
+    def on_left_loop_1(self):
+        self.toggle_led(self.LEFT_LOOP_1)
+
+    def on_left_loop_2(self):
+        self.toggle_led(self.LEFT_LOOP_2)
+
+    def on_left_loop_3(self):
+        self.toggle_led(self.LEFT_LOOP_3)
+
+    def on_left_loop_4(self):
+        self.toggle_led(self.LEFT_LOOP_4)
+
+    def on_left_fx_1(self):
+        self.toggle_led(self.LEFT_FX_1)
+
+    def on_left_fx_2(self):
+        self.toggle_led(self.LEFT_FX_2)
+
+    def on_left_fx_3(self):
+        self.toggle_led(self.LEFT_FX_3)
+
+    def on_left_fx_4(self):
+        self.toggle_led(self.LEFT_FX_4)
+
+    def on_left_sampler_1(self):
+        self.toggle_led(self.LEFT_SAMPLER_1)
+
+    def on_left_sampler_2(self):
+        self.toggle_led(self.LEFT_SAMPLER_2)
+
+    def on_left_sampler_3(self):
+        self.toggle_led(self.LEFT_SAMPLER_3)
+
+    def on_left_sampler_4(self):
+        self.toggle_led(self.LEFT_SAMPLER_4)
 
     def on_right_hot_cue_1(self):
-        self.toggle_led(self.RIGHT_PAD_1)
+        self.toggle_led(self.RIGHT_HOT_CUE_1)
 
     def on_right_hot_cue_2(self):
-        self.toggle_led(self.RIGHT_PAD_2)
+        self.toggle_led(self.RIGHT_HOT_CUE_2)
 
     def on_right_hot_cue_3(self):
-        self.toggle_led(self.RIGHT_PAD_3)
+        self.toggle_led(self.RIGHT_HOT_CUE_3)
 
     def on_right_hot_cue_4(self):
-        self.toggle_led(self.RIGHT_PAD_4)
+        self.toggle_led(self.RIGHT_HOT_CUE_4)
 
+    def on_right_loop_1(self):
+        self.toggle_led(self.RIGHT_LOOP_1)
+
+    def on_right_loop_2(self):
+        self.toggle_led(self.RIGHT_LOOP_2)
+
+    def on_right_loop_3(self):
+        self.toggle_led(self.RIGHT_LOOP_3)
+
+    def on_right_loop_4(self):
+        self.toggle_led(self.RIGHT_LOOP_4)
+
+    def on_right_fx_1(self):
+        self.toggle_led(self.RIGHT_FX_1)
+
+    def on_right_fx_2(self):
+        self.toggle_led(self.RIGHT_FX_2)
+
+    def on_right_fx_3(self):
+        self.toggle_led(self.RIGHT_FX_3)
+
+    def on_right_fx_4(self):
+        self.toggle_led(self.RIGHT_FX_4)
+
+    def on_right_sampler_1(self):
+        self.toggle_led(self.RIGHT_SAMPLER_1)
+
+    def on_right_sampler_2(self):
+        self.toggle_led(self.RIGHT_SAMPLER_2)
+
+    def on_right_sampler_3(self):
+        self.toggle_led(self.RIGHT_SAMPLER_3)
+
+    def on_right_sampler_4(self):
+        self.toggle_led(self.RIGHT_SAMPLER_4)
 
 try:
     device = MyDJControl()
