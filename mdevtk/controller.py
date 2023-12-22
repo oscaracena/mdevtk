@@ -53,6 +53,8 @@ class CCCallback:
 
 
 class LedBlinker(Thread):
+    # NOTE: Multiple threads can safely send and receive notes on the same port.
+
     def __init__(self, ctrl, led_id, speed):
         super().__init__()
         self.daemon = True

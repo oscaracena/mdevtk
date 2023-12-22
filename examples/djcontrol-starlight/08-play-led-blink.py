@@ -25,6 +25,7 @@ class MyDJControl(DJControlStarlight):
         else:
             self.blinker.stop()
             self.blinker = None
+
         self.print_status()
 
     def on_left_wheel_scratch(self, value):
@@ -42,6 +43,7 @@ class MyDJControl(DJControlStarlight):
             if self.ev_count <= -self.EV_BLOCK:
                 self.ev_count = 0
                 self.speed = max(1, self.speed -1)
+
         self.print_status()
 
         if self.blinker is not None:
