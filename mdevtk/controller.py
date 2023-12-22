@@ -3,6 +3,7 @@
 # Copyright (C) 2023, Oscar Acena <oscaracena@gmail.com>
 # This software is under the terms of Apache License v2 or later.
 
+from threading import Thread
 import time
 import mido
 
@@ -51,6 +52,42 @@ class CCCallback:
             log.error(f" invalid callback: {err}")
 
 
+class LedBlinker(Thread):
+    def __init__(self, ctrl, led_id, speed):
+        super().__init__()
+        self.daemon = True
+
+        self._should_stop = False
+        self._is_paused = False
+        self._ctrl = ctrl
+        self._led_id = led_id
+        self._led_is_on = False
+        self.set_speed(speed)
+        self.start()
+
+    def run(self):
+        while not self._should_stop:
+            if not self._is_paused:
+                self._led_is_on = not self._led_is_on
+                self._ctrl.set_led(self._led_id, self._led_is_on)
+            q = 1 / self.speed
+            time.sleep(q)
+
+    def stop(self):
+        self.pause()
+        self._should_stop = True
+
+    def pause(self):
+        self._ctrl.set_led(self._led_id, False)
+        self._is_paused = True
+
+    def play(self):
+        self._is_paused = False
+
+    def set_speed(self, speed):
+        self.speed = max(0, speed)
+
+
 class DeviceController:
     # Control commands, overwrite in derived controller if different
     CMD_LED_ON   = 0x01
@@ -67,7 +104,8 @@ class DeviceController:
         self._port = mido.open_ioport(name, callback=self._on_message)
 
     def __del__(self):
-        self._port.close()
+        if hasattr(self, "_port"):
+            self._port.close()
 
     def loop(self):
         while True:
@@ -78,6 +116,9 @@ class DeviceController:
 
     def led_off(self, led_id):
         self.set_led(led_id, False)
+
+    def led_blink(self, led_id, speed=3):
+        return LedBlinker(self, led_id, speed)
 
     def set_led(self, led_id, status):
         channel, note = led_id
