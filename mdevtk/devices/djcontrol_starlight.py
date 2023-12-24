@@ -60,6 +60,10 @@ class DJControlStarlight(DeviceController):
     RIGHT_SAMPLER_3      = (7, 50)
     RIGHT_SAMPLER_4      = (7, 51)
 
+    LEFT_BASE            = (1, 35)
+    RIGHT_BASE           = (2, 35)
+    BASE_OFF             = (0, 36)
+
     # MODE controls
     LEFT_MODE_HOT_CUE    = (1, 15)
     LEFT_MODE_LOOP       = (1, 16)
