@@ -62,7 +62,7 @@ class DJControlStarlight(DeviceController):
 
     LEFT_BASE            = (1, 35)
     RIGHT_BASE           = (2, 35)
-    BASE_OFF             = (0, 36)
+    BASE_BLINKING        = (0, 36)
 
     # MODE controls
     LEFT_MODE_HOT_CUE    = (1, 15)
@@ -74,9 +74,6 @@ class DJControlStarlight(DeviceController):
     RIGHT_MODE_LOOP      = (2, 16)
     RIGHT_MODE_FX        = (2, 17)
     RIGHT_MODE_SAMPLER   = (2, 18)
-
-    # TOGGLE controls
-    TOGGLE_BASS_FILTER   = (0, 1)
 
     def __init__(self):
         super().__init__("DJControl Starlight")
@@ -155,13 +152,22 @@ class DJControlStarlight(DeviceController):
         self.on_cc(channel=0, controls=(36, 4), cb="on_headphones_gain")
 
         self.on_cc(channel=1, controls=(32, 0), cb="on_left_volume")
-        self.on_cc(channel=1, controls=(34, 2), cb="on_left_bass_filter")
+        self.on_cc(channel=1, controls=(33, 1), cb="on_left_filter")
+        self.on_cc(channel=1, controls=(34, 2), cb="on_left_bass")
         self.on_cc(channel=1, controls=(40, 8), cb="on_left_tempo_slide")
         self.on_cc(channel=1, controls=(9,),    cb="on_left_wheel_transport")
         self.on_cc(channel=1, controls=(10,),   cb="on_left_wheel_scratch")
 
         self.on_cc(channel=2, controls=(32, 0), cb="on_right_volume")
-        self.on_cc(channel=2, controls=(34, 2), cb="on_right_bass_filter")
+        self.on_cc(channel=2, controls=(33, 1), cb="on_right_filter")
+        self.on_cc(channel=2, controls=(34, 2), cb="on_right_bass")
         self.on_cc(channel=2, controls=(40, 8), cb="on_right_tempo_slide")
         self.on_cc(channel=2, controls=(9,),    cb="on_right_wheel_transport")
         self.on_cc(channel=2, controls=(10,),   cb="on_right_wheel_scratch")
+
+    def _rgb_to_value(self, r, g, b):
+        # format is r: 2 bits, g: 3 bits, b: 2 bits; rrgggbb (7 bits = 127)
+        r = min(255, max(0, r)) * 4 // 256
+        g = min(255, max(0, g)) * 8 // 256
+        b = min(255, max(0, b)) * 4 // 256
+        return b | g << 2 | r << 5

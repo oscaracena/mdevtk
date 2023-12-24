@@ -203,8 +203,11 @@ class MyDJControl(DJControlStarlight):
     def on_left_volume(self, value):
         print(f"left volume, value: {value}")
 
-    def on_left_bass_filter(self, value):
-        print(f"left bass filter, value: {value}")
+    def on_left_bass(self, value):
+        print(f"left bass, value: {value}")
+
+    def on_left_filter(self, value):
+        print(f"left filter, value: {value}")
 
     def on_left_tempo_slide(self, value):
         print(f"left tempo slide, value: {value}")
@@ -218,8 +221,11 @@ class MyDJControl(DJControlStarlight):
     def on_right_volume(self, value):
         print(f"right volume, value: {value}")
 
-    def on_right_bass_filter(self, value):
-        print(f"right bass filter, value: {value}")
+    def on_right_bass(self, value):
+        print(f"right bass, value: {value}")
+
+    def on_right_filter(self, value):
+        print(f"right filter, value: {value}")
 
     def on_right_tempo_slide(self, value):
         print(f"right tempo slide, value: {value}")

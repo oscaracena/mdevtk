@@ -12,14 +12,17 @@ from .utils import log
 
 
 class NoteCallback:
-    def __init__(self, controller, cb_name):
+    def __init__(self, controller, cb_name, send_value=False):
         self._handler = getattr(controller, cb_name, None)
+        self._send_value = send_value
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, msg):
         if self._handler is None:
             return
+
         try:
-            self._handler(*args, **kwargs)
+            args = [msg.velocity] if self._send_value else []
+            self._handler(*args)
         except Exception as err:
             log.error(f" invalid callback: {err}")
 
@@ -30,7 +33,7 @@ class CCCallback:
         self._controls = controls  # MSB, LSB
         self._bytes = {}
 
-    def __call__(self, msg, *args, **kwargs):
+    def __call__(self, msg):
         if self._handler is None:
             return
 
@@ -47,7 +50,7 @@ class CCCallback:
         self._bytes = {}
 
         try:
-            self._handler(value, *args, **kwargs)
+            self._handler(value)
         except Exception as err:
             log.error(f" invalid callback: {err}")
 
@@ -129,14 +132,20 @@ class DeviceController:
             velocity=cmd)
         self._port.send(msg)
 
+    def set_rgb_led(self, led_id, r, g, b):
+        channel, note = led_id
+        msg = mido.Message(type="note_on", channel=channel, note=note,
+            velocity=self._rgb_to_value(r, g, b))
+        self._port.send(msg)
+
     def change_bank(self, msg):
         channel, note = msg
         msg = mido.Message(type="note_on", channel=channel, note=note,
             velocity=self.CMD_CHANGE_BANK)
         self._port.send(msg)
 
-    def on_note(self, channel, note, cb):
-        cb = NoteCallback(self, cb)
+    def on_note(self, channel, note, cb, send_value=False):
+        cb = NoteCallback(self, cb, send_value)
         msg = mido.Message(type="note_on", channel=channel, note=note)
         self._mapping[self._msg_id(msg)] = cb
 
@@ -147,20 +156,21 @@ class DeviceController:
             self._mapping[self._msg_id(msg)] = cb
 
     def _on_message(self, msg):
-        args = []
         if msg.type == "note_on":
             if msg.velocity == 0:
                 return
-        elif msg.type == "control_change":
-            args.append(msg)
-        else:
+        elif msg.type != "control_change":
             return
 
         callback = self._mapping.get(self._msg_id(msg))
         if callback is None:
             return
 
-        callback(*args)
+        callback(msg)
+
+    def _rgb_to_value(self, r, g, b):
+        # NOTE: overwrite this method to implement a suitable conversion.
+        return r + g + b
 
     def _find_device(self, id):
         devices = mido.get_output_names()

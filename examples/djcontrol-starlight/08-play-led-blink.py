@@ -19,6 +19,10 @@ class MyDJControl(DJControlStarlight):
         # count the events to reduce the wheel speed (i.e. 1 valid for each EV_BLOCK)
         self.ev_count = 0
 
+    def stop(self):
+        if self.blinker:
+            self.blinker.stop()
+
     def on_left_play(self):
         if self.blinker is None:
             self.blinker = self.led_blink(self.LEFT_PLAY, speed=self.speed)
@@ -59,4 +63,5 @@ try:
     print("Press the left PLAY button to make it BLINK! Set its speed with the JOG WHEEL.")
     device.loop()
 except KeyboardInterrupt:
+    device.stop()
     print("\b\b  \nBye!")
