@@ -5,7 +5,7 @@
 # This software is under the terms of Apache License v2 or later.
 
 import sys
-from mdevtk import DJControlStarlight
+from mdevtk import APCKey25MK2
 try:
     import alsaaudio
 except ImportError:
@@ -13,23 +13,29 @@ except ImportError:
     sys.exit(-1)
 
 
-class MyDJControl(DJControlStarlight):
+class MyDJControl(APCKey25MK2):
     def __init__(self):
         super().__init__()
         self.mixer = alsaaudio.Mixer()
+        self.volume = self.mixer.getvolume()[0]
 
-    def on_master_gain(self, value):
-        vol = (value * 100) // self.MAX_VALUE
-        self.mixer.setvolume(vol)
+    def on_knob_1(self, value):
+        # NOTE: value < 64 -> CW, value > 64 CCW
+        if value < 64:
+            self.volume = min(100, self.volume + value)
+        else:
+            self.volume = max(0, self.volume + (value - 128))
 
-        blocks = (vol // 2)
+        self.mixer.setvolume(self.volume)
+
+        blocks = (self.volume // 2)
         bar = "#" * blocks + " " * (50 - blocks)
-        print(f"\rVolume change to {vol:3d}% \b |{bar}| ", end="")
+        print(f"\rVolume change to {self.volume:3d}% \b |{bar}| ", end="")
 
 
 try:
     device = MyDJControl()
-    print("Rotate the master gain knob to control your system's volume...")
+    print("Rotate the knob 1 to control your system's volume...")
     device.loop()
 except KeyboardInterrupt:
     print("\b\b  \nBye!")

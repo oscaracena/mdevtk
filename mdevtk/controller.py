@@ -21,7 +21,7 @@ class NoteCallback:
             return
 
         try:
-            args = [msg.velocity] if self._send_value else []
+            args = [msg] if self._send_value else []
             self._handler(*args)
         except Exception as err:
             log.error(f" invalid callback: {err}")

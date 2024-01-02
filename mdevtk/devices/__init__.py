@@ -4,8 +4,10 @@
 # This software is under the terms of Apache License v2 or later.
 
 from .djcontrol_starlight import DJControlStarlight
+from .apc_key25_mk2 import APCKey25MK2
 
 
 __all__ = [
-    DJControlStarlight
+    DJControlStarlight,
+    APCKey25MK2,
 ]
