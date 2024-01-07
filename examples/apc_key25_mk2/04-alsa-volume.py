@@ -13,7 +13,7 @@ except ImportError:
     sys.exit(-1)
 
 
-class MyDJControl(APCKey25MK2):
+class MyAPCKey25(APCKey25MK2):
     def __init__(self):
         super().__init__()
         self.mixer = alsaaudio.Mixer()
@@ -34,7 +34,7 @@ class MyDJControl(APCKey25MK2):
 
 
 try:
-    device = MyDJControl()
+    device = MyAPCKey25()
     print("Rotate the knob 1 to control your system's volume...")
     device.loop()
 except KeyboardInterrupt:

@@ -7,13 +7,13 @@
 from mdevtk import APCKey25MK2
 
 
-class MyDJControl(APCKey25MK2):
+class MyAPCKey25(APCKey25MK2):
     def on_shift(self):
         print("Shift KEY pressed!")
 
 
 try:
-    device = MyDJControl()
+    device = MyAPCKey25()
     print("Press the SHIFT button on your DJControl...")
     device.loop()
 except KeyboardInterrupt:

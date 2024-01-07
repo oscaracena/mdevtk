@@ -7,7 +7,7 @@
 from mdevtk import APCKey25MK2
 
 
-class MyDJControl(APCKey25MK2):
+class MyAPCKey25(APCKey25MK2):
     def __init__(self):
         super().__init__()
         self._max_value = 128
@@ -34,7 +34,7 @@ class MyDJControl(APCKey25MK2):
 
 
 try:
-    device = MyDJControl()
+    device = MyAPCKey25()
     print("Move the knob 1 (K1)...")
     device.loop()
 except KeyboardInterrupt:

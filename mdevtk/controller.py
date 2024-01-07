@@ -126,6 +126,9 @@ class DeviceController:
         return LedBlinker(self, led_id, speed)
 
     def set_led(self, led_id, status):
+        if not isinstance(led_id, (tuple, list)):
+            led_id = (0, led_id)
+
         channel, note = led_id
         cmd = self.CMD_LED_ON if status else self.CMD_LED_OFF
         msg = mido.Message(type="note_on", channel=channel, note=note,

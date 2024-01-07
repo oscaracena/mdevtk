@@ -40,4 +40,4 @@ def get_colour_logger(name):
     return log
 
 
-log = get_colour_logger("djcontrol")
+log = get_colour_logger("mdevtk")

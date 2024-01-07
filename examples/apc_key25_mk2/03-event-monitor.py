@@ -7,9 +7,9 @@
 from mdevtk import APCKey25MK2
 
 
-class MyDJControl(APCKey25MK2):
+class MyAPCKey25(APCKey25MK2):
     # NOTE: instead of overriding 'on_clip_N()', you can use 'on_clip(n)'
-    def on_clip(self, number):
+    def on_clip_change(self, number):
         print(f"clip number: {number}")
 
     # def on_clip_1(self):
@@ -209,7 +209,7 @@ class MyDJControl(APCKey25MK2):
 
 
 try:
-    device = MyDJControl()
+    device = MyAPCKey25()
     print("Press any button, key or knob...")
     device.loop()
 except KeyboardInterrupt:

@@ -8,7 +8,7 @@ import time
 from mdevtk import APCKey25MK2
 
 
-class MyDJControl(APCKey25MK2):
+class MyAPCKey25(APCKey25MK2):
     def __init__(self):
         super().__init__()
         self.color = 0
@@ -30,7 +30,7 @@ class MyDJControl(APCKey25MK2):
         print(f"\r< COLOR value: 0x{color:06x} > ", end="")
 
 try:
-    device = MyDJControl()
+    device = MyAPCKey25()
     print("Press UP and DOWN to change PAD 1 LED color...")
     while True:
         time.sleep(1)

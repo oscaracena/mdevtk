@@ -7,7 +7,7 @@
 from mdevtk import APCKey25MK2
 
 
-class MyDJControl(APCKey25MK2):
+class MyAPCKey25(APCKey25MK2):
     def __init__(self):
         super().__init__()
         self.is_on = False
@@ -24,7 +24,7 @@ class MyDJControl(APCKey25MK2):
 
 
 try:
-    device = MyDJControl()
+    device = MyAPCKey25()
     print("Press the soft key SOLO (scene 2) to change its LED status...")
     device.loop()
 except KeyboardInterrupt:

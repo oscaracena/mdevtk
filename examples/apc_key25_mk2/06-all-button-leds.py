@@ -8,7 +8,7 @@ import time
 from mdevtk import APCKey25MK2
 
 
-class MyDJControl(APCKey25MK2):
+class MyAPCKey25(APCKey25MK2):
     def __init__(self):
         super().__init__()
         self.set_all_leds(True)
@@ -39,7 +39,7 @@ class MyDJControl(APCKey25MK2):
             self.set_rgb_led(led, *color)
 
 try:
-    device = MyDJControl()
+    device = MyAPCKey25()
     print("Now, you should see all controller LEDs on...")
     while True:
         time.sleep(1)
