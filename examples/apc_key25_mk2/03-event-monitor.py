@@ -8,129 +8,129 @@ from mdevtk import APCKey25MK2
 
 
 class MyAPCKey25(APCKey25MK2):
-    # NOTE: instead of overriding 'on_clip_N()', you can use 'on_clip(n)'
-    def on_clip_change(self, number):
-        print(f"clip number: {number}")
+    # NOTE: instead of overriding 'on_pad_N()', you can use 'on_pad_pressed(n)'
+    def on_pad_pressed(self, number):
+        print(f"pad number: {number}")
 
-    # def on_clip_1(self):
-    #     print("clip 1")
+    # def on_pad_1(self):
+    #     print("pad 1")
 
-    # def on_clip_2(self):
-    #     print("clip 2")
+    # def on_pad_2(self):
+    #     print("pad 2")
 
-    def on_clip_3(self):
-        print("clip 3")
+    def on_pad_3(self):
+        print("pad 3")
 
-    def on_clip_4(self):
-        print("clip 4")
+    def on_pad_4(self):
+        print("pad 4")
 
-    def on_clip_5(self):
-        print("clip 5")
+    def on_pad_5(self):
+        print("pad 5")
 
-    def on_clip_6(self):
-        print("clip 6")
+    def on_pad_6(self):
+        print("pad 6")
 
-    def on_clip_7(self):
-        print("clip 7")
+    def on_pad_7(self):
+        print("pad 7")
 
-    def on_clip_8(self):
-        print("clip 8")
+    def on_pad_8(self):
+        print("pad 8")
 
-    def on_clip_9(self):
-        print("clip 9")
+    def on_pad_9(self):
+        print("pad 9")
 
-    def on_clip_10(self):
-        print("clip 10")
+    def on_pad_10(self):
+        print("pad 10")
 
-    def on_clip_11(self):
-        print("clip 11")
+    def on_pad_11(self):
+        print("pad 11")
 
-    def on_clip_12(self):
-        print("clip 12")
+    def on_pad_12(self):
+        print("pad 12")
 
-    def on_clip_13(self):
-        print("clip 13")
+    def on_pad_13(self):
+        print("pad 13")
 
-    def on_clip_14(self):
-        print("clip 14")
+    def on_pad_14(self):
+        print("pad 14")
 
-    def on_clip_15(self):
-        print("clip 15")
+    def on_pad_15(self):
+        print("pad 15")
 
-    def on_clip_16(self):
-        print("clip 16")
+    def on_pad_16(self):
+        print("pad 16")
 
-    def on_clip_17(self):
-        print("clip 17")
+    def on_pad_17(self):
+        print("pad 17")
 
-    def on_clip_18(self):
-        print("clip 18")
+    def on_pad_18(self):
+        print("pad 18")
 
-    def on_clip_19(self):
-        print("clip 19")
+    def on_pad_19(self):
+        print("pad 19")
 
-    def on_clip_20(self):
-        print("clip 20")
+    def on_pad_20(self):
+        print("pad 20")
 
-    def on_clip_21(self):
-        print("clip 21")
+    def on_pad_21(self):
+        print("pad 21")
 
-    def on_clip_22(self):
-        print("clip 22")
+    def on_pad_22(self):
+        print("pad 22")
 
-    def on_clip_23(self):
-        print("clip 23")
+    def on_pad_23(self):
+        print("pad 23")
 
-    def on_clip_24(self):
-        print("clip 24")
+    def on_pad_24(self):
+        print("pad 24")
 
-    def on_clip_25(self):
-        print("clip 25")
+    def on_pad_25(self):
+        print("pad 25")
 
-    def on_clip_26(self):
-        print("clip 26")
+    def on_pad_26(self):
+        print("pad 26")
 
-    def on_clip_27(self):
-        print("clip 27")
+    def on_pad_27(self):
+        print("pad 27")
 
-    def on_clip_28(self):
-        print("clip 28")
+    def on_pad_28(self):
+        print("pad 28")
 
-    def on_clip_29(self):
-        print("clip 29")
+    def on_pad_29(self):
+        print("pad 29")
 
-    def on_clip_30(self):
-        print("clip 30")
+    def on_pad_30(self):
+        print("pad 30")
 
-    def on_clip_31(self):
-        print("clip 31")
+    def on_pad_31(self):
+        print("pad 31")
 
-    def on_clip_32(self):
-        print("clip 32")
+    def on_pad_32(self):
+        print("pad 32")
 
-    def on_clip_33(self):
-        print("clip 33")
+    def on_pad_33(self):
+        print("pad 33")
 
-    def on_clip_34(self):
-        print("clip 34")
+    def on_pad_34(self):
+        print("pad 34")
 
-    def on_clip_35(self):
-        print("clip 35")
+    def on_pad_35(self):
+        print("pad 35")
 
-    def on_clip_36(self):
-        print("clip 36")
+    def on_pad_36(self):
+        print("pad 36")
 
-    def on_clip_37(self):
-        print("clip 37")
+    def on_pad_37(self):
+        print("pad 37")
 
-    def on_clip_38(self):
-        print("clip 38")
+    def on_pad_38(self):
+        print("pad 38")
 
-    def on_clip_39(self):
-        print("clip 39")
+    def on_pad_39(self):
+        print("pad 39")
 
-    def on_clip_40(self):
-        print("clip 40")
+    def on_pad_40(self):
+        print("pad 40")
 
     def on_up(self):
         print("up")
@@ -145,34 +145,34 @@ class MyAPCKey25(APCKey25MK2):
         print("right")
 
     def on_knob_ctrl_volume(self):
-        print("knob_ctrl_volume")
+        print("knob ctrl volume")
 
     def on_knob_ctrl_pan(self):
-        print("knob_ctrl_pan")
+        print("knob ctrl pan")
 
     def on_knob_ctrl_send(self):
-        print("knob_ctrl_send")
+        print("knob ctrl send")
 
     def on_knob_ctrl_device(self):
-        print("knob_ctrl_device")
+        print("knob ctrl device")
 
     def on_stop_all_clips(self):
-        print("stop_all_clips")
+        print("stop all clips")
 
     def on_soft_key_clip_stop(self):
-        print("soft_key_clip_stop")
+        print("soft key clip stop")
 
     def on_soft_key_solo(self):
-        print("soft_key_solo")
+        print("soft key solo")
 
     def on_soft_key_mute(self):
-        print("soft_key_mute")
+        print("soft key mute")
 
     def on_soft_key_rec_arm(self):
-        print("soft_key_rec_arm")
+        print("soft key rec arm")
 
     def on_soft_key_select(self):
-        print("soft_key_select")
+        print("soft key select")
 
     def on_play(self):
         print("play")

@@ -4,8 +4,6 @@
 # Copyright (C) 2023, Oscar Acena <oscaracena@gmail.com>
 # This software is under the terms of Apache License v2 or later.
 
-import time
-from hexdump import hexdump
 from mdevtk import APCKey25MK2
 
 
@@ -31,16 +29,16 @@ class MyAPCKey25(APCKey25MK2):
         if self._bank == 4:
             if pad > len(self._selected):
                 return
-            color, mode = self._selected[pad - 1]
-            color = self.COLORS[color]
-            print(f" + COLOR: #{color:06X}, MODE: {mode}")
+            color_id, mode = self._selected[pad - 1]
+            color = self.COLORS[color_id]
+            print(f" + COLOR: #{color:06X} (vel: 0x{color_id:02X}), MODE: {mode}")
             return
 
         if self._bank == 3:
-            color = self.DEF_COLOR
+            color_id = self.DEF_COLOR
             if 1 <= pad < 9:
                 mode = self._mode
-                color = pad - 1 + (self._bank * 40)
+                color_id = pad - 1 + (self._bank * 40)
             elif 17 <= pad < 24:
                 mode = self.LED_BRIGHT_10 + (pad - 17)
             elif 25 <= pad < 29:
@@ -51,11 +49,11 @@ class MyAPCKey25(APCKey25MK2):
                 return
         else:
             mode = self._mode
-            color = pad - 1 + (self._bank * 40)
+            color_id = pad - 1 + (self._bank * 40)
 
-        self._selected.append((color, mode))
-        color = self.COLORS[color]
-        print(f" + COLOR: #{color:06X}, MODE: {mode}")
+        self._selected.append((color_id, mode))
+        color = self.COLORS[color_id]
+        print(f" + COLOR: #{color:06X} (vel: 0x{color_id:02X}), MODE: {mode}")
 
     def on_stop_all_clips(self):
         self._selected = []
