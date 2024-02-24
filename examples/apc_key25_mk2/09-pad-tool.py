@@ -121,6 +121,9 @@ class MyAPCKey25(APCKey25MK2):
                 break
             self.set_pad_led(pad, color, self._mode)
 
+        if self._is_remove_mode:
+            self.led_on(self.LED_MUTE)
+
         # show modes in bank 4
         if self._bank == 3:
             color = self.DEF_COLOR
