@@ -16,6 +16,7 @@ class MyAPCKey25(APCKey25MK2):
         self._mode = self.LED_BRIGHT_50
         self._k1_cuml = 0
         self._selected = []
+        self._is_remove_mode = False
 
         self._update()
 
@@ -23,15 +24,29 @@ class MyAPCKey25(APCKey25MK2):
         self._bank = track_number - 1
         self._update()
 
+    def on_soft_key_mute(self):
+        self._is_remove_mode ^= True
+        if self._is_remove_mode:
+            self.led_on(self.LED_MUTE)
+        else:
+            self.led_off(self.LED_MUTE)
+
     def on_pad_pressed(self, pad):
         if self._bank > 4:
             return
         if self._bank == 4:
             if pad > len(self._selected):
                 return
-            color_id, mode = self._selected[pad - 1]
+            spec = self._selected[pad - 1]
+            if spec is None:
+                return
+            color_id, mode = spec
             color = self.COLORS[color_id]
             print(f" + COLOR: #{color:06X} (vel: 0x{color_id:02X}), MODE: {mode}")
+
+            if self._is_remove_mode:
+                self._selected[pad - 1] = None
+                self._update()
             return
 
         if self._bank == 3:
@@ -51,7 +66,12 @@ class MyAPCKey25(APCKey25MK2):
             mode = self._mode
             color_id = pad - 1 + (self._bank * 40)
 
-        self._selected.append((color_id, mode))
+        try:
+            hole = self._selected.index(None)
+            self._selected[hole] = (color_id, mode)
+        except ValueError:
+            self._selected.append((color_id, mode))
+
         color = self.COLORS[color_id]
         print(f" + COLOR: #{color:06X} (vel: 0x{color_id:02X}), MODE: {mode}")
 
@@ -79,10 +99,20 @@ class MyAPCKey25(APCKey25MK2):
         self._k1_cuml = 0
         self._update()
 
-    def _update(self):
-        # clear al pads
+    def all_off(self):
         for pad in range(40):
             self.led_off(pad)
+
+        btn_track_1 = self.TRACK_1[1]
+        for pad in range(8):
+            self.led_off(btn_track_1 + pad)
+
+        btn_scene_1 = self.SCENE_1[1]
+        for pad in range(5):
+            self.led_off(btn_scene_1 + pad)
+
+    def _update(self):
+        self.all_off()
 
         # show current bank colors
         for pad in range(40):
@@ -111,20 +141,23 @@ class MyAPCKey25(APCKey25MK2):
 
         # show selected pads in bank 5
         elif self._bank == 4:
-            for pad, (color, mode) in enumerate(self._selected):
+            for pad, spec in enumerate(self._selected):
+                if spec is None:
+                    continue
+                color, mode = spec
                 self.set_pad_led(pad, color, mode)
 
         # update track buttons
         btn_track_1 = self.TRACK_1[1]
-        for pad in range(8):
-            self.led_off(btn_track_1 + pad)
         self.led_on(btn_track_1 + self._bank)
 
 
 try:
     device = MyAPCKey25()
-    print("Use track buttons to change page.")
+    print("Use track buttons to change page (page 5 is your selection).")
     print("Use K1 to change brightness.")
+    print("Press MUTE to enter delete mode (for page 5)")
     device.loop()
 except KeyboardInterrupt:
+    device.all_off()
     print("\b\b  \nBye!")
