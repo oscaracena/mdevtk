@@ -67,7 +67,7 @@ class APCKey25MK2(DeviceController):
     SCENE_4         = (0, 0x55)
     SCENE_5         = (0, 0x56)
 
-    # pad LEDs: (channel, note)
+    # PAD buttons: (channel, note)
     PAD_1           = (6, 0x00)
     PAD_2           = (6, 0x01)
     PAD_3           = (6, 0x02)
@@ -127,6 +127,7 @@ class APCKey25MK2(DeviceController):
 
     # FIXME: add callback aliases for TRACK_ and SECENE_ buttons
     # FIXME: add support for port 0 (keybed and sustain button)
+    # FIXME: add support for note-off events too
 
     def __init__(self):
         # NOTE: C = port 1, K = port 0

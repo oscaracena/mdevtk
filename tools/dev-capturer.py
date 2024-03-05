@@ -133,6 +133,9 @@ class DevCapturer:
             self._dev.write()
 
     def _cmd_monitor_mode(self):
+        if self._args.device_name is None:
+            parser.error("monitor mode requires --device-name")
+
         self._dev = MonitorController(self._args)
         try:
             self._dev.loop()

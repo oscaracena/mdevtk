@@ -14,7 +14,7 @@ class MyAPCKey25(APCKey25MK2):
 
 try:
     device = MyAPCKey25()
-    print("Press the SHIFT button on your DJControl...")
+    print("Press the SHIFT button on your controller...")
     device.loop()
 except KeyboardInterrupt:
     print("\rBye!")

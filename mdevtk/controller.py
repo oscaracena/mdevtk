@@ -11,10 +11,15 @@ from .exceptions import NoDeviceFound
 from .utils import log
 
 
+# FIXME: Refactor & DRY these Callbacks!
+
 class NoteCallback:
-    def __init__(self, controller, cb_name, send_value=False):
-        self._handler = getattr(controller, cb_name, None)
+    def __init__(self, controller, callback, send_value=False, kwargs={}):
+        if not callable(callback):
+            callback = getattr(controller, callback, None)
+        self._handler = callback
         self._send_value = send_value
+        self._kwargs = kwargs
 
     def __call__(self, msg):
         if self._handler is None:
@@ -22,16 +27,68 @@ class NoteCallback:
 
         try:
             args = [msg] if self._send_value else []
-            self._handler(*args)
+            self._handler(*args, **self._kwargs)
+        except Exception as err:
+            log.error(f" invalid callback: {err}")
+
+
+class AfterTouchCallback:
+    def __init__(self, controller, callback, kwargs={}):
+        if not callable(callback):
+            callback = getattr(controller, callback, None)
+        self._handler = callback
+        self._kwargs = kwargs
+
+    def __call__(self, msg):
+        if self._handler is None:
+            return
+
+        try:
+            self._handler(msg.value, **self._kwargs)
+        except Exception as err:
+            log.error(f" invalid callback: {err}")
+
+
+class PitchWheelCallback:
+    def __init__(self, controller, callback, kwargs={}):
+        if not callable(callback):
+            callback = getattr(controller, callback, None)
+        self._handler = callback
+        self._kwargs = kwargs
+
+    def __call__(self, msg):
+        if self._handler is None:
+            return
+
+        try:
+            self._handler(msg.pitch, **self._kwargs)
+        except Exception as err:
+            log.error(f" invalid callback: {err}")
+
+
+class PCCallback:
+    def __init__(self, controller, callback, kwargs={}):
+        if not callable(callback):
+            callback = getattr(controller, callback, None)
+        self._handler = callback
+        self._kwargs = kwargs
+
+    def __call__(self, msg):
+        if self._handler is None:
+            return
+
+        try:
+            self._handler(msg.program, **self._kwargs)
         except Exception as err:
             log.error(f" invalid callback: {err}")
 
 
 class CCCallback:
-    def __init__(self, controller, cb_name, controls):
+    def __init__(self, controller, cb_name, controls, kwargs):
         self._handler = getattr(controller, cb_name, None)
         self._controls = controls  # MSB, LSB
         self._bytes = {}
+        self._kwargs = kwargs
 
     def __call__(self, msg):
         if self._handler is None:
@@ -50,7 +107,7 @@ class CCCallback:
         self._bytes = {}
 
         try:
-            self._handler(value)
+            self._handler(value, **self._kwargs)
         except Exception as err:
             log.error(f" invalid callback: {err}")
 
@@ -147,29 +204,45 @@ class DeviceController:
             velocity=self.CMD_CHANGE_BANK)
         self._port.send(msg)
 
-    def on_note(self, channel, note, cb, send_value=False):
-        cb = NoteCallback(self, cb, send_value)
+    def on_note(self, channel, note, cb, send_value=False, **kwargs):
+        cb = NoteCallback(self, cb, send_value, kwargs)
         msg = mido.Message(type="note_on", channel=channel, note=note)
         self._mapping[self._msg_id(msg)] = cb
 
-    def on_cc(self, channel, controls, cb):
-        cb = CCCallback(self, cb, controls)
+    def on_pc(self, channel, program, cb, **kwargs):
+        cb = PCCallback(self, cb, kwargs)
+        msg = mido.Message(type="program_change", channel=channel, program=program)
+        self._mapping[self._msg_id(msg)] = cb
+
+    def on_cc(self, channel, controls, cb, **kwargs):
+        cb = CCCallback(self, cb, controls, kwargs)
         for ctrl in controls:
             msg = mido.Message(type="control_change", channel=channel, control=ctrl)
             self._mapping[self._msg_id(msg)] = cb
 
+    def on_aftertouch(self, channel, cb, **kwargs):
+        cb = AfterTouchCallback(self, cb, kwargs)
+        msg = mido.Message(type="aftertouch", channel=channel)
+        self._mapping[self._msg_id(msg, 1)] = cb
+
+    def on_pitchwheel(self, channel, cb, **kwargs):
+        cb = PitchWheelCallback(self, cb, kwargs)
+        msg = mido.Message(type="pitchwheel", channel=channel)
+        self._mapping[self._msg_id(msg, 1)] = cb
+
     def _on_message(self, msg):
+        sig_bytes = 2
         if msg.type == "note_on":
             if msg.velocity == 0:
                 return
-        elif msg.type != "control_change":
+        elif msg.type in ("aftertouch", "pitchwheel"):
+            sig_bytes = 1
+        elif msg.type not in ("program_change", "control_change"):
             return
 
-        callback = self._mapping.get(self._msg_id(msg))
-        if callback is None:
-            return
-
-        callback(msg)
+        callback = self._mapping.get(self._msg_id(msg, sig_bytes))
+        if callback is not None:
+            callback(msg)
 
     def _rgb_to_value(self, r, g, b):
         # NOTE: overwrite this method to implement a suitable conversion.
@@ -181,5 +254,5 @@ class DeviceController:
             if id in name:
                 return name
 
-    def _msg_id(self, msg):
-        return bytes(msg.bytes()[:2])
+    def _msg_id(self, msg, num_bytes=2):
+        return bytes(msg.bytes()[:num_bytes])
