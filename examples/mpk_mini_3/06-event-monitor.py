@@ -92,6 +92,34 @@ class MyMPKMiniMK3(MPKMiniMK3):
     def on_pad_8_pc(self, program, bank):
         print(f"pad 8 PC, program: {program}, bank {bank}")
 
+    # NOTE: instead of overriding 'on_pad_N_at()', you can use 'on_pad_at(n)'
+    def on_pad_at(self, number, value, bank):
+        print(f"pad AfterTouch number: {number}, value: {value}, bank: {bank}")
+
+    # def on_pad_1_at(self, value, bank):
+    #     print(f"pad 1 AfterTouch, value: {value}, bank {bank}")
+
+    # def on_pad_2_at(self, value, bank):
+    #     print(f"pad 2 AfterTouch, value: {value}, bank {bank}")
+
+    def on_pad_3_at(self, value, bank):
+        print(f"pad 3 AfterTouch, value: {value}, bank {bank}")
+
+    def on_pad_4_at(self, value, bank):
+        print(f"pad 4 AfterTouch, value: {value}, bank {bank}")
+
+    def on_pad_5_at(self, value, bank):
+        print(f"pad 5 AfterTouch, value: {value}, bank {bank}")
+
+    def on_pad_6_at(self, value, bank):
+        print(f"pad 6 AfterTouch, value: {value}, bank {bank}")
+
+    def on_pad_7_at(self, value, bank):
+        print(f"pad 7 AfterTouch, value: {value}, bank {bank}")
+
+    def on_pad_8_at(self, value, bank):
+        print(f"pad 8 AfterTouch, value: {value}, bank {bank}")
+
     def on_knob_1(self, value):
         print(f"knob 1, value: {value}")
 
@@ -116,14 +144,11 @@ class MyMPKMiniMK3(MPKMiniMK3):
     def on_knob_8(self, value):
         print(f"knob 8, value: {value}")
 
-    def on_pad_aftertouch(self, value):
-        print(f"pad aftertouch, value: {value}")
-
     def on_x_axis(self, value):
-        print(f"pitchwheel x axis, value: {value}")
+        print(f"joystick x axis, value: {value}")
 
-    def on_y_axis(self, value):
-        print(f"pitchwheel y axis, value: {value}")
+    def on_y_axis(self, value, direction):
+        print(f"joystick y axis, value: {value}, direction: {direction}")
 
 
 try:

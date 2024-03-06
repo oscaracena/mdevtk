@@ -13,23 +13,41 @@ class MPKMiniMK3(DeviceController):
     def __init__(self):
         super().__init__("MPK mini 3")
 
-        self.on_note(channel=9, note=36,  cb="on_pad_1", bank="A")
-        self.on_note(channel=9, note=37,  cb="on_pad_2", bank="A")
-        self.on_note(channel=9, note=38,  cb="on_pad_3", bank="A")
-        self.on_note(channel=9, note=39,  cb="on_pad_4", bank="A")
-        self.on_note(channel=9, note=40,  cb="on_pad_5", bank="A")
-        self.on_note(channel=9, note=41,  cb="on_pad_6", bank="A")
-        self.on_note(channel=9, note=42,  cb="on_pad_7", bank="A")
-        self.on_note(channel=9, note=43,  cb="on_pad_8", bank="A")
+        self.on_note(channel=9, note=36, cb="on_pad_1", bank="A")
+        self.on_note(channel=9, note=37, cb="on_pad_2", bank="A")
+        self.on_note(channel=9, note=38, cb="on_pad_3", bank="A")
+        self.on_note(channel=9, note=39, cb="on_pad_4", bank="A")
+        self.on_note(channel=9, note=40, cb="on_pad_5", bank="A")
+        self.on_note(channel=9, note=41, cb="on_pad_6", bank="A")
+        self.on_note(channel=9, note=42, cb="on_pad_7", bank="A")
+        self.on_note(channel=9, note=43, cb="on_pad_8", bank="A")
 
-        self.on_note(channel=9, note=44,  cb="on_pad_1", bank="B")
-        self.on_note(channel=9, note=45,  cb="on_pad_2", bank="B")
-        self.on_note(channel=9, note=46,  cb="on_pad_3", bank="B")
-        self.on_note(channel=9, note=47,  cb="on_pad_4", bank="B")
-        self.on_note(channel=9, note=48,  cb="on_pad_5", bank="B")
-        self.on_note(channel=9, note=49,  cb="on_pad_6", bank="B")
-        self.on_note(channel=9, note=50,  cb="on_pad_7", bank="B")
-        self.on_note(channel=9, note=51,  cb="on_pad_8", bank="B")
+        self.on_note(channel=9, note=44, cb="on_pad_1", bank="B")
+        self.on_note(channel=9, note=45, cb="on_pad_2", bank="B")
+        self.on_note(channel=9, note=46, cb="on_pad_3", bank="B")
+        self.on_note(channel=9, note=47, cb="on_pad_4", bank="B")
+        self.on_note(channel=9, note=48, cb="on_pad_5", bank="B")
+        self.on_note(channel=9, note=49, cb="on_pad_6", bank="B")
+        self.on_note(channel=9, note=50, cb="on_pad_7", bank="B")
+        self.on_note(channel=9, note=51, cb="on_pad_8", bank="B")
+
+        self.on_polytouch(channel=9, note=36, cb="on_pad_1_at", bank="A")
+        self.on_polytouch(channel=9, note=37, cb="on_pad_2_at", bank="A")
+        self.on_polytouch(channel=9, note=38, cb="on_pad_3_at", bank="A")
+        self.on_polytouch(channel=9, note=39, cb="on_pad_4_at", bank="A")
+        self.on_polytouch(channel=9, note=40, cb="on_pad_5_at", bank="A")
+        self.on_polytouch(channel=9, note=41, cb="on_pad_6_at", bank="A")
+        self.on_polytouch(channel=9, note=42, cb="on_pad_7_at", bank="A")
+        self.on_polytouch(channel=9, note=43, cb="on_pad_8_at", bank="A")
+
+        self.on_polytouch(channel=9, note=44, cb="on_pad_1_at", bank="B")
+        self.on_polytouch(channel=9, note=45, cb="on_pad_2_at", bank="B")
+        self.on_polytouch(channel=9, note=46, cb="on_pad_3_at", bank="B")
+        self.on_polytouch(channel=9, note=47, cb="on_pad_4_at", bank="B")
+        self.on_polytouch(channel=9, note=48, cb="on_pad_5_at", bank="B")
+        self.on_polytouch(channel=9, note=49, cb="on_pad_6_at", bank="B")
+        self.on_polytouch(channel=9, note=50, cb="on_pad_7_at", bank="B")
+        self.on_polytouch(channel=9, note=51, cb="on_pad_8_at", bank="B")
 
         self.on_cc(channel=9, controls=(16,), cb="on_pad_1_cc", bank="A")
         self.on_cc(channel=9, controls=(17,), cb="on_pad_2_cc", bank="A")
@@ -58,8 +76,6 @@ class MPKMiniMK3(DeviceController):
         self.on_cc(channel=0, controls=(76,), cb="on_knob_7")
         self.on_cc(channel=0, controls=(77,), cb="on_knob_8")
 
-        self.on_cc(channel=0, controls=(1,), cb="on_y_axis")
-
         self.on_pc(channel=9, program=0, cb="on_pad_1_pc", bank="A")
         self.on_pc(channel=9, program=1, cb="on_pad_2_pc", bank="A")
         self.on_pc(channel=9, program=2, cb="on_pad_3_pc", bank="A")
@@ -78,7 +94,8 @@ class MPKMiniMK3(DeviceController):
         self.on_pc(channel=9, program=14, cb="on_pad_7_pc", bank="B")
         self.on_pc(channel=9, program=15, cb="on_pad_8_pc", bank="B")
 
-        self.on_aftertouch(channel=9, cb="on_pad_aftertouch")
+        self.on_cc(channel=0, controls=(1,), cb="on_y_axis", direction="up")
+        self.on_cc(channel=0, controls=(2,), cb="on_y_axis", direction="down")
         self.on_pitchwheel(channel=0, cb="on_x_axis")
 
     def on_pad_pressed(self, pad_number, bank):
@@ -161,3 +178,30 @@ class MPKMiniMK3(DeviceController):
 
     def on_pad_8_pc(self, program, bank):
         self.on_pad_pc(8, program, bank)
+
+    def on_pad_at(self, pad_number, value, bank):
+        pass
+
+    def on_pad_1_at(self, value, bank):
+        self.on_pad_at(1, value, bank)
+
+    def on_pad_2_at(self, value, bank):
+        self.on_pad_at(2, value, bank)
+
+    def on_pad_3_at(self, value, bank):
+        self.on_pad_at(3, value, bank)
+
+    def on_pad_4_at(self, value, bank):
+        self.on_pad_at(4, value, bank)
+
+    def on_pad_5_at(self, value, bank):
+        self.on_pad_at(5, value, bank)
+
+    def on_pad_6_at(self, value, bank):
+        self.on_pad_at(6, value, bank)
+
+    def on_pad_7_at(self, value, bank):
+        self.on_pad_at(7, value, bank)
+
+    def on_pad_8_at(self, value, bank):
+        self.on_pad_at(8, value, bank)

@@ -10,8 +10,8 @@ from mdevtk import MPKMiniMK3
 class MyMPKMiniMK3(MPKMiniMK3):
     def __init__(self):
         super().__init__()
-        self._x = 0
-        self._y = 0
+        self._x = 8192
+        self._y = 128
         self._print_values()
 
     def _print_values(self):
@@ -19,8 +19,8 @@ class MyMPKMiniMK3(MPKMiniMK3):
         self._print_y()
         print("\033[3A")
 
-    def on_y_axis(self, value):
-        self._y = value
+    def on_y_axis(self, value, direction):
+        self._y = 128 + value if direction == "up" else 128 - value
         self._print_values()
 
     def on_x_axis(self, value):
@@ -42,7 +42,7 @@ class MyMPKMiniMK3(MPKMiniMK3):
 
     def _print_y(self):
         width = 50
-        perc = (self._y * 100) // 127
+        perc = (self._y * 100) // 255
         pos = (perc * width) // 100
         pos = min(width -1, pos)
 

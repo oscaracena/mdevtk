@@ -1,6 +1,6 @@
 # -*- mode: python; coding: utf-8 -*-
 
-# Copyright (C) 2023, Oscar Acena <oscaracena@gmail.com>
+# Copyright (C) 2023,2024, Oscar Acena <oscaracena@gmail.com>
 # This software is under the terms of Apache License v2 or later.
 
 from threading import Thread
@@ -11,7 +11,91 @@ from .exceptions import NoDeviceFound
 from .utils import log
 
 
-# FIXME: Refactor & DRY these Callbacks!
+class BaseCallback:
+    def __init__(self, controller, callback, field_name, kwargs={}):
+        if not callable(callback):
+            callback = getattr(controller, callback, None)
+        self._handler = callback
+        self._kwargs = kwargs
+        self._field_name = field_name
+
+    def __call__(self, msg):
+        if self._handler is None:
+            return
+
+        try:
+            self._handler(getattr(msg, self._field_name), **self._kwargs)
+        except Exception as err:
+            log.error(f" invalid callback: {err}")
+
+
+# class PolyTouchCallback:
+#     def __init__(self, controller, callback, kwargs={}):
+#         if not callable(callback):
+#             callback = getattr(controller, callback, None)
+#         self._handler = callback
+#         self._kwargs = kwargs
+
+#     def __call__(self, msg):
+#         if self._handler is None:
+#             return
+
+#         try:
+#             self._handler(msg.value, **self._kwargs)
+#         except Exception as err:
+#             log.error(f" invalid callback: {err}")
+
+
+# class AfterTouchCallback:
+#     def __init__(self, controller, callback, kwargs={}):
+#         if not callable(callback):
+#             callback = getattr(controller, callback, None)
+#         self._handler = callback
+#         self._kwargs = kwargs
+
+#     def __call__(self, msg):
+#         if self._handler is None:
+#             return
+
+#         try:
+#             self._handler(msg.value, **self._kwargs)
+#         except Exception as err:
+#             log.error(f" invalid callback: {err}")
+
+
+# class PitchWheelCallback:
+#     def __init__(self, controller, callback, kwargs):
+#         if not callable(callback):
+#             callback = getattr(controller, callback, None)
+#         self._handler = callback
+#         self._kwargs = kwargs
+
+#     def __call__(self, msg):
+#         if self._handler is None:
+#             return
+
+#         try:
+#             self._handler(msg.pitch, **self._kwargs)
+#         except Exception as err:
+#             log.error(f" invalid callback: {err}")
+
+
+# class PCCallback:
+#     def __init__(self, controller, callback, kwargs):
+#         if not callable(callback):
+#             callback = getattr(controller, callback, None)
+#         self._handler = callback
+#         self._kwargs = kwargs
+
+#     def __call__(self, msg):
+#         if self._handler is None:
+#             return
+
+#         try:
+#             self._handler(msg.program, **self._kwargs)
+#         except Exception as err:
+#             log.error(f" invalid callback: {err}")
+
 
 class NoteCallback:
     def __init__(self, controller, callback, send_value=False, kwargs={}):
@@ -28,57 +112,6 @@ class NoteCallback:
         try:
             args = [msg] if self._send_value else []
             self._handler(*args, **self._kwargs)
-        except Exception as err:
-            log.error(f" invalid callback: {err}")
-
-
-class AfterTouchCallback:
-    def __init__(self, controller, callback, kwargs={}):
-        if not callable(callback):
-            callback = getattr(controller, callback, None)
-        self._handler = callback
-        self._kwargs = kwargs
-
-    def __call__(self, msg):
-        if self._handler is None:
-            return
-
-        try:
-            self._handler(msg.value, **self._kwargs)
-        except Exception as err:
-            log.error(f" invalid callback: {err}")
-
-
-class PitchWheelCallback:
-    def __init__(self, controller, callback, kwargs={}):
-        if not callable(callback):
-            callback = getattr(controller, callback, None)
-        self._handler = callback
-        self._kwargs = kwargs
-
-    def __call__(self, msg):
-        if self._handler is None:
-            return
-
-        try:
-            self._handler(msg.pitch, **self._kwargs)
-        except Exception as err:
-            log.error(f" invalid callback: {err}")
-
-
-class PCCallback:
-    def __init__(self, controller, callback, kwargs={}):
-        if not callable(callback):
-            callback = getattr(controller, callback, None)
-        self._handler = callback
-        self._kwargs = kwargs
-
-    def __call__(self, msg):
-        if self._handler is None:
-            return
-
-        try:
-            self._handler(msg.program, **self._kwargs)
         except Exception as err:
             log.error(f" invalid callback: {err}")
 
@@ -210,7 +243,7 @@ class DeviceController:
         self._mapping[self._msg_id(msg)] = cb
 
     def on_pc(self, channel, program, cb, **kwargs):
-        cb = PCCallback(self, cb, kwargs)
+        cb = BaseCallback(self, cb, "program", kwargs)
         msg = mido.Message(type="program_change", channel=channel, program=program)
         self._mapping[self._msg_id(msg)] = cb
 
@@ -221,12 +254,17 @@ class DeviceController:
             self._mapping[self._msg_id(msg)] = cb
 
     def on_aftertouch(self, channel, cb, **kwargs):
-        cb = AfterTouchCallback(self, cb, kwargs)
+        cb = BaseCallback(self, cb, "value", kwargs)
         msg = mido.Message(type="aftertouch", channel=channel)
         self._mapping[self._msg_id(msg, 1)] = cb
 
+    def on_polytouch(self, channel, note, cb, **kwargs):
+        cb = BaseCallback(self, cb, "value", kwargs)
+        msg = mido.Message(type="polytouch", note=note, channel=channel)
+        self._mapping[self._msg_id(msg)] = cb
+
     def on_pitchwheel(self, channel, cb, **kwargs):
-        cb = PitchWheelCallback(self, cb, kwargs)
+        cb = BaseCallback(self, cb, "pitch", kwargs)
         msg = mido.Message(type="pitchwheel", channel=channel)
         self._mapping[self._msg_id(msg, 1)] = cb
 
@@ -237,7 +275,7 @@ class DeviceController:
                 return
         elif msg.type in ("aftertouch", "pitchwheel"):
             sig_bytes = 1
-        elif msg.type not in ("program_change", "control_change"):
+        elif msg.type not in ("program_change", "control_change", "polytouch"):
             return
 
         callback = self._mapping.get(self._msg_id(msg, sig_bytes))
