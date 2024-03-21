@@ -49,9 +49,11 @@ class NoteCallback:
 
 
 class CCCallback:
-    def __init__(self, controller, cb_name, controls, kwargs):
+    def __init__(self, controller, cb_name, controls, send_value=True, note_off=True, kwargs={}):
         self._handler = getattr(controller, cb_name, None)
         self._controls = controls  # MSB, LSB
+        self._send_value = send_value
+        self._note_off = note_off
         self._bytes = {}
         self._kwargs = kwargs
 
@@ -71,8 +73,12 @@ class CCCallback:
             value += v * (127 ** k)
         self._bytes = {}
 
+        if value == 0 and not self._note_off:
+            return
+
         try:
-            self._handler(value, **self._kwargs)
+            args = [value] if self._send_value else []
+            self._handler(*args, **self._kwargs)
         except Exception as err:
             log.error(f" invalid callback: {err}")
 
@@ -179,8 +185,10 @@ class DeviceController:
         msg = mido.Message(type="program_change", channel=channel, program=program)
         self._mapping[self._msg_id(msg)] = cb
 
-    def on_cc(self, channel, controls, cb, **kwargs):
-        cb = CCCallback(self, cb, controls, kwargs)
+    def on_cc(self, channel, controls, cb, send_value=True, note_off=True, **kwargs):
+        if isinstance(controls, int):
+            controls = [controls]
+        cb = CCCallback(self, cb, controls, send_value, note_off, kwargs)
         for ctrl in controls:
             msg = mido.Message(type="control_change", channel=channel, control=ctrl)
             self._mapping[self._msg_id(msg)] = cb
