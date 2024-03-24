@@ -72,7 +72,7 @@ class MyLaunchpadMiniMK3(LaunchpadMiniMK3):
 
         # show current bank colors
         elif self._bank < 2:
-            color = 63 * self._bank
+            color = 64 * self._bank
             for row in range(1, 9):
                 for col in range(1, 9):
                     pad = row * 10 + col

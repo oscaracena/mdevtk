@@ -6,6 +6,10 @@
 import mido
 
 from ..controller import DeviceController
+try:
+    from hexdump import hexdump
+except ImportError:
+    hexdump = print
 
 
 class LaunchpadMiniMK3(DeviceController):
@@ -82,11 +86,37 @@ class LaunchpadMiniMK3(DeviceController):
     def print_clear(self):
         self._send_sysex("07")
 
+    def setup_faders(self, faders, vertical=True):
+        assert len(faders) <= 8, "There could only be 8 faders!"
+        msg = f"01 00 0{'0' if vertical else '1'}"
+        for index, f in enumerate(faders):
+            msg += f"{index:02X}"
+            if f is None:
+                msg += f"00 {index:02X} 00"
+                continue
+            msg += '01' if f.get("bipolar", False) else '00'
+            cc = int(f.get("cc", index))
+            msg += f"{cc:02X}"
+            msg += f'{min(127, max(0, int(f.get("color", 37)))):02X}'
+
+            name = f.get("name", f"fader_{index}")
+            self.on_cc(channel=4, controls=cc, cb=f"on_{name}_change")
+
+        self._send_sysex(msg)
+
+    def show_faders(self):
+        self._send_sysex("00 0D")
+
+    def hide_faders(self):
+        self._send_sysex("00 00")
+
     def _enable_daw_mode(self, enabled=True):
         self._send_sysex(f"10 0{1 if enabled else 0}")
 
-    def _send_sysex(self, cmd):
-        # print(f"SysEx: {cmd}")
+    def _send_sysex(self, cmd, debug=False):
         cmd = bytes.fromhex(cmd)
+        if debug:
+            print(f"SysEx:")
+            hexdump(self.SYSEX_HEADER + cmd)
         msg = mido.Message(type="sysex", data=self.SYSEX_HEADER + cmd)
         self._port.send(msg)
