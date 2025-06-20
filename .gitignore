@@ -1,3 +1,13 @@
 *.pyc
 __pycache__
 *~
+
+build
+*.egg-info
+
+debian/.debhelper/
+debian/debhelper-build-stamp
+debian/files
+debian/mdevtk.debhelper.log
+debian/mdevtk.substvars
+debian/mdevtk/

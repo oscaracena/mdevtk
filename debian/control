@@ -1,0 +1,25 @@
+Source: mdevtk
+Section: python
+Priority: optional
+Maintainer: Oscar Aceña Herrera <oscaracena@gmail.com>
+Build-Depends:
+ debhelper (>= 7.0.50~),
+ debhelper-compat (= 12),
+ quilt,
+ python3,
+ python3-setuptools,
+ dh-python,
+Standards-Version: 4.6.0.1
+
+Package: mdevtk
+Architecture: all
+Depends:
+ ${misc:Depends},
+ python3,
+ python3-mido,
+ python3-rtmidi,
+Description: MIDI Device ToolKit (mdevtk)
+ This is MIDI Device ToolKit (mdevtk). The aim of this Python
+ library is to handle MIDI events from a controller (let the user
+ choose what to do), and send back MIDI events to control it
+ (for instance, the LED lights of a DJControl Starlight).
