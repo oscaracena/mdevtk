@@ -4,7 +4,9 @@
 # This software is under the terms of Apache License v2 or later.
 
 from .exceptions import NoDeviceFound, MDevTKException
-from .devices import DJControlStarlight, APCKey25MK2, MPKMiniMK3, LaunchpadMiniMK3
+from .devices import (
+    DJControlStarlight, APCKey25MK2, MPKMiniMK3, LaunchpadMiniMK3, SMCPadPocket
+)
 
 
 __all__ = [
@@ -12,6 +14,7 @@ __all__ = [
     APCKey25MK2,
     MPKMiniMK3,
     LaunchpadMiniMK3,
+    SMCPadPocket,
 
     MDevTKException,
     NoDeviceFound,
