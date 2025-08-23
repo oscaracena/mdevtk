@@ -3,6 +3,7 @@
 # Copyright (C) 2025, Oscar Acena <oscaracena@gmail.com>
 # This software is under the terms of Apache License v2 or later.
 
+import time
 from threading import Event
 
 import mido
@@ -15,13 +16,19 @@ except ImportError:
 
 
 class SMCPadPocket(DeviceController):
-    DEVID_CTRL      = [0x00, 0x32, 0x09]
-    DEVID_STAT      = [0x00, 0x32, 0x0D]
+    DEVID_CTRL            = [0x00, 0x32, 0x09]
+    DEVID_STAT            = [0x00, 0x32, 0x0D]
 
-    PRESETS_0       = [0x70, 0x16]
-    PRESETS_1       = [0x63, 0x2D]
-    PRESETS_2       = [0x56, 0x44]
-    PRESETS_3       = [0x49, 0x5B]
+    PRESETS_0             = [0x70, 0x16]
+    PRESETS_1             = [0x63, 0x2D]
+    PRESETS_2             = [0x56, 0x44]
+    PRESETS_3             = [0x49, 0x5B]
+
+    PROP_LED_OFFSET       = 0x05
+    PROP_NOTE_OFFSET      = 0x02
+    PROP_CHANNEL_OFFSET   = 0x01
+    PROP_TYPE_OFFSET      = 0x00
+    PROP_MODE_OFFSET      = 2912
 
     def __init__(self, note_start=36, channel=9):
         super().__init__("SMC-PAD Pocket-Private")
@@ -71,26 +78,64 @@ class SMCPadPocket(DeviceController):
         self._send_sysex(cmd)
         self.preset = preset
 
-    def set_rgb_led(self, pad, r, g, b, bank=0):
+    def led_off(self, pad, bank=None, preset=None):
+        pad, bank, preset = self._clean_fields(pad, bank, preset)
+        self.set_rgb_led(pad, 0, 0, 0, bank, preset)
+
+    def set_rgb_led(self, pad, r, g, b, bank=None, preset=None):
         # Message format:
         # - DEVID[3] 59 00 00 40 02 ADDR[2] 00 00 30 00 00 00 R[1] G[1] B+CRC[1] CRC[1]
 
-        assert 0 <= bank <= 6, "bank should be in range [0, 6]"
         r = max(0, min(255, r))
         g = max(0, min(255, g))
         b = max(0, min(255, b))
-
         color = (r, g, b)
+        pad, bank, preset = self._clean_fields(pad, bank, preset)
+        led_addr = self._get_prop_addr(pad, bank, preset, self.PROP_LED_OFFSET)
+
         cmd = [0x59, 0, 0, 0x40, 0x02]
-        cmd += self._get_pad_addr(bank, pad)
+        cmd += list(self._pack_bytes(led_addr.to_bytes(2, "little")))[:2]
         cmd += [0, 0, 0x30, 0, 0, 0]
         cmd += self._pack_bytes(bytes(color))
 
-        pad_no = 5 + (bank * 16 + pad) * 26
-        checksum = self._get_checksum([pad_no] + list(color))
+        checksum = self._get_checksum([led_addr] + list(color))
         cs_bytes = self._pack_bytes(checksum.to_bytes(1, "little"), 3)
         cmd[-1] |= cs_bytes[0]
         cmd.append(cs_bytes[1])
+
+        self._send_sysex(cmd)
+
+    def set_pad_mode(self, pad, mode: str, preset=None):
+        modes = {"pad": 0, "control": 1}
+        assert mode in modes, f"mode must be one of {list(modes.keys())}"
+        self._set_property(pad, [modes.get(mode)], self.PROP_MODE_OFFSET, 0, preset)
+
+    def set_pad_type(self, pad, type: str, preset=None):
+        types = {"note": 0, "cc-toggle": 1, "momentary": 2, "program": 3, "custom": 4}
+        assert type in types, f"type must be one of {list(types.keys())}"
+        self._set_property(pad, [types.get(type)], self.PROP_TYPE_OFFSET, 0, preset)
+
+    def set_pad_note(self, pad, note, bank=None, preset=None):
+        assert 0 <= note <= 0x7F, "note number should be in range [0, 127]"
+        self._set_property(pad, [note], self.PROP_NOTE_OFFSET, bank, preset)
+
+    def set_pad_channel(self, pad, channel, bank=None, preset=None):
+        assert 0 <= channel <= 15, "channel should be in range [0, 15]"
+        self._set_property(pad, [channel], self.PROP_CHANNEL_OFFSET, bank, preset)
+
+    def _set_property(self, pad, value: list, offset, bank=None, preset=None):
+        # Message format:
+        # - DEVID[3] 49 00 00 40 02 ADDR[2] 00 00 10 00 00 00 VALUE[1] CRC[2]
+
+        pad, bank, preset = self._clean_fields(pad, bank, preset)
+        prop_addr = self._get_prop_addr(pad, bank, preset, offset)
+
+        cmd = [0x49, 0, 0, 0x40, 0x02]
+        cmd += list(self._pack_bytes(prop_addr.to_bytes(2, "little")))[:2]
+        cmd += [0, 0, 0x10, 0, 0, 0] + value
+
+        checksum = self._get_checksum([0xFE, prop_addr] + value)
+        cmd += self._pack_bytes(checksum.to_bytes(1, "little"), 1)
 
         self._send_sysex(cmd)
 
@@ -114,6 +159,10 @@ class SMCPadPocket(DeviceController):
         msg = mido.Message(type="sysex", data=data)
         self._port.send(msg)
 
+        # NOTE: I see a problem when sending two messages too quickly, neither of them
+        # arrived. Adding a little wait here appears to fix it.
+        time.sleep(0.001)
+
     def _recv_sysex(self, data):
         # Message format:
         # - DEVID[3] 01 01 00 00 02 00 00 00 00 00 01 00 00 20 01 58 11 00 00 00 00
@@ -123,13 +172,28 @@ class SMCPadPocket(DeviceController):
             self.preset = data[-3]
             self._synced.set()
 
-    def _get_pad_addr(self, bank: int, pad: int, offset: int = 5):
-        n_pad = bank * 16 + pad
-        b1 = offset + (n_pad * 26) % 0x80
-        b2 = n_pad // 5
-        return [b1, b2]
+    def _clean_fields(self, pad, bank, preset):
+        bank = bank if bank is not None else self.bank
+        preset = preset if preset is not None else self.preset
 
-    def _get_checksum(self, data: bytes):
+        assert 0 <= preset <= 3, "preset should be in range [0, 3]"
+        assert 0 <= bank <= 6, "bank should be in range [0, 6]"
+        assert 0 <= pad <= 15, "pad should be in range [0, 5]"
+
+        return pad, bank, preset
+
+    def _get_prop_addr(self, pad, bank, preset, offset):
+        # 19: distance between presets
+        # 26: distance between pads
+        # 16: number of pads
+        # 7: number of banks
+        # 2916: distance between presets for PAD mode addressing
+
+        if offset == self.PROP_MODE_OFFSET:
+            return offset + (2916 + 15) * preset + pad
+        return offset + 19 * preset + (preset * 7 * 16 + bank * 16 + pad) * 26
+
+    def _get_checksum(self, data: list):
         magic = 0xF7
         ds = 0
         for x in data:

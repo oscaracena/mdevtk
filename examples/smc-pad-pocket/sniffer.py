@@ -37,18 +37,18 @@ TARGET_IDS = [
 if len(sys.argv) > 1:
     TARGET_IDS = [list(bytes.fromhex(sys.argv[1]))]
 
+def process(data):
+    print(' '.join(f'{b:02X}' for b in data))
+
 # Open the port and listen for messages
 with mido.open_input(MIDI_IN_PORT) as inport:
     try:
         for msg in inport:
-            if msg.type == 'sysex':
-                data = list(msg.data)
-                if data[:3] in TARGET_IDS:
-                    sysex_bytes = [0xF0] + data + [0xF7]
-                    print(' '.join(f'{b:02X}' for b in sysex_bytes))
-            #     else:
-            #         print(f"msg to other destination ({data[:3]})")
-            # else:
-            #     print("unknown message:", msg)
+            if msg.type != 'sysex':
+                continue
+            data = list(msg.data)
+            if data[:3] in TARGET_IDS:
+                sysex_bytes = [0xF0] + data + [0xF7]
+                process(sysex_bytes)
     except KeyboardInterrupt:
         print("\nStopped by user")

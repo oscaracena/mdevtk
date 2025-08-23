@@ -11,7 +11,7 @@ This document provides information about the MIDI protocol used by the M-VAVE SM
 * Note repeat, swing and latch functions
 * MIDI over Bluetooth and USB-C
 * Internal battery of 780 mAh
-* charging/BL status LED
+* Charging/BL status LED
 * Hardware switch for on/off
 
 * 4 presets
@@ -30,12 +30,22 @@ This document provides information about the MIDI protocol used by the M-VAVE SM
 
 # Common fields/information
 
-* Manufacturer addresses: there are at least these address:
+* Manufacturer addresses: there are at least these:
   - `00 32 0D`: used for status or dump requests.
   - `00 32 09`: used for setup the controller (set a LED color, pad note, etc).
   - `00 32 01`: used for ACKs.
 
-* Checksum: usually, the last two bytes contains some kind of checksum, aplied to the relevant fields of the message. The checksum is of 8-bits, but it is stored using a 7-bit packaging, where the MS-bits are saved on the LS-bits of the following byte. Moreover, if the previous byte has remaining bits to pack, the LS-bits of the first byte are also used, so the whole checksum gets offsetted.
+* Checksum: usually, the last two bytes of each message contains a checksum, aplied to the relevant fields of the message. The checksum is of 8-bits, but it is stored using a 7-bit packaging, where the MS-bits are saved on the LS-bits of the following byte. Moreover, if the previous byte has remaining bits to pack, the LS-bits of the first byte are also used, so the whole checksum gets offsetted.
+
+* Setting address: the addressing scheme is the same for many properties: each property of each PAD of each bank of each preset can be addressed individually. The address generation scheme is always the same, but each property starts with a different offset, and is separated from the others PADs by a distance of 26 places. For instance, the offset for the LEDs is 5, and for the note number is 2.
+
+  Addresses are created taking into account the preset, the bank and the PAD index. Each preset is separated from the next by a distance of 19 places. The address of certain property could be obtained with the formula:
+
+  `address = prop_offset + 19 * preset + (preset * 7 * 16 + bank * 16 + pad) * 26`
+
+  Being 7 the number of banks and 16 the number of PADs.
+
+* The PAD mode property address is an exception of the previous rule, as the mode is only affected by the preset and the PAD (is shared across all banks of the same preset).
 
 
 # Message list
@@ -69,10 +79,22 @@ This document provides information about the MIDI protocol used by the M-VAVE SM
 
 `F0  00 32 09  59 00 00 40 02  1E 4B 00 00  30 00 00 00  00 00 7C  2F 03  F7`
 
-* Change PAD color request:
-  - **PAD Address**: Bytes 9-10 (ex. value `1E 4B`)
-  - **Color**: Bytes 17-19 (ex. values `00 00 00`, `7F 01 00`, `00 7E 03` and `00 00 7C`). This value is given in 8-Bit RGB components, but they are packed in 7-bit bytes (as 8th bit in MIDI SysEx is reserved). So, the RED 7 LS-bits are stored in byte 17, and its MS-bit is stored in LS-bit of next byte. The GREEN 6 LS-bits are stored in byte 18 (with an offset of 1, for the MS-bit of red), and its 2 MS-bits are stored in the LS-bits of the next byte. The BLUE color is packed the same way, but now with an offset of 2 bits, and its remaining 3 MS-bits are saved in the following byte, which is the first byte of the checksum (which will have an offset of 3 bits too).
+* Change PAD color request
+  - **LED address**: Bytes 9-10 (ex. value `1E 4B`). This property has an address offset of 0x05.
 
+  - **Color**: Bytes 17-19 (ex. values `00 00 00`, `7F 01 00`, `00 7E 03` and `00 00 7C`). This value is given in 8-bit RGB components, but they are packed in 7-bit bytes (as 8th bit in MIDI SysEx is reserved). So, the RED 7 LS-bits are stored in byte 17, and its MS-bit is stored in LS-bit of next byte. The GREEN 6 LS-bits are stored in byte 18 (with an offset of 1, for the MS-bit of red), and its 2 MS-bits are stored in the LS-bits of the next byte. The BLUE color is packed the same way, but now with an offset of 2 bits, and its remaining 3 MS-bits are saved in the following byte, which is the first byte of the checksum (which will have an offset of 3 bits too).
+
+---
+`F0  00 32 09  49 00 00 40 02  00 00  00 00  10 00 00 00  01  70 03  F7`
+
+* Change PAD property request
+  - **Property address**: Bytes 9-10 (ex. value `00 00`). The specific property to change is given by this field. Each property type has its own initial offset. Known ones are:
+    - LED: 0x05
+    - Note number: 0x02
+    - Channel: 0x01
+    - PAD Type: 0x00
+    - PAD Mode: 2912 (this addressing is different, as explained above)
+  - **Property value**: Byte 17 (ex. value `01`). One single byte value, usually less than 128.
 
 ---
 `F0  00 32 0D  41 00 00 40 02  00 00  00 00  10 7E 00 00  06 00  F7`
@@ -81,12 +103,11 @@ This document provides information about the MIDI protocol used by the M-VAVE SM
 
 `F0  00 32 0D  41 00 00 40 02  5B 56  00 00  10 4E 00 00  01 00  F7`
 
-* DUMP SETTINGS request:
-  - **Offset**: Bytes 9-10 (ex. values: `00 00`, `71 07` and `5B 56`)
+* DUMP SETTINGS request
+  - **Offset**: Bytes 9-10 (ex. values: `00 00`, `71 07` and `5B 56`). Position of data to read from.
     - List of known offsets: `00 00`, `71 07`, `62 0F`, `53 17`, `44 1F`, `35 27`, `26 2F`, `17 37`, `08 3F`, `79 46`, `6A 4E` and `5B 56`.
 
 ---
 `F0  00 32 01  08 00 00 00 00  7F 01  F7`
 
-* ACK response:
-
+* ACK response
