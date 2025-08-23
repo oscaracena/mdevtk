@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import mido
 
 # List available input ports
@@ -27,7 +28,14 @@ while True:
 print(f"\nListening for messages on {MIDI_IN_PORT}... (Ctrl+C to exit)\n")
 
 # Manufacturer ID to filter
-TARGET_MANUFACTURER = [0x00, 0x32, 0x09]
+TARGET_IDS = [
+    [0x00, 0x32, 0x09], # control
+    [0x00, 0x32, 0x0D], # status
+    [0x00, 0x32, 0x01], # ack
+]
+
+if len(sys.argv) > 1:
+    TARGET_IDS = [list(bytes.fromhex(sys.argv[1]))]
 
 # Open the port and listen for messages
 with mido.open_input(MIDI_IN_PORT) as inport:
@@ -35,8 +43,12 @@ with mido.open_input(MIDI_IN_PORT) as inport:
         for msg in inport:
             if msg.type == 'sysex':
                 data = list(msg.data)
-                if data[:3] == TARGET_MANUFACTURER:
+                if data[:3] in TARGET_IDS:
                     sysex_bytes = [0xF0] + data + [0xF7]
                     print(' '.join(f'{b:02X}' for b in sysex_bytes))
+            #     else:
+            #         print(f"msg to other destination ({data[:3]})")
+            # else:
+            #     print("unknown message:", msg)
     except KeyboardInterrupt:
         print("\nStopped by user")

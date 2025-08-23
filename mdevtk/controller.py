@@ -208,17 +208,25 @@ class DeviceController:
         msg = mido.Message(type="pitchwheel", channel=channel)
         self._mapping[self._msg_id(msg, 1)] = cb
 
+    def on_sysex(self, msg_id, cb, **kwargs):
+        cb = BaseCallback(self, cb, "data", kwargs)
+        self._mapping[bytes(msg_id)] = cb
+
     def _on_message(self, msg):
+        callback = None
         sig_bytes = 2
         if msg.type == "note_on":
             if msg.velocity == 0:
                 return
         elif msg.type in ("aftertouch", "pitchwheel"):
             sig_bytes = 1
+        elif msg.type == "sysex":
+            callback = self._mapping.get(bytes(msg.data[:3]))
         elif msg.type not in ("program_change", "control_change", "polytouch"):
             return
 
-        callback = self._mapping.get(self._msg_id(msg, sig_bytes))
+        if callback is None:
+            callback = self._mapping.get(self._msg_id(msg, sig_bytes))
         if callback is not None:
             callback(msg)
 
