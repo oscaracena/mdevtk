@@ -1,11 +1,11 @@
 # -*- mode: python; coding: utf-8 -*-
 
-# Copyright (C) 2023,2024, Oscar Acena <oscaracena@gmail.com>
+# Copyright (C) 2023-2025, Oscar Acena <oscaracena@gmail.com>
 # This software is under the terms of Apache License v2 or later.
 
-from threading import Thread
 import time
 import mido
+from threading import Thread
 
 from .exceptions import NoDeviceFound
 from .utils import log

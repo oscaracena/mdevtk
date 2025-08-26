@@ -18,6 +18,7 @@ except ImportError:
 class SMCPadPocket(DeviceController):
     DEVID_CTRL            = [0x00, 0x32, 0x09]
     DEVID_STAT            = [0x00, 0x32, 0x0D]
+    DEVID_ACK             = [0x00, 0x32, 0x01]
 
     PRESETS_0             = [0x70, 0x16]
     PRESETS_1             = [0x63, 0x2D]
@@ -30,9 +31,11 @@ class SMCPadPocket(DeviceController):
     PROP_TYPE_OFFSET      = 0x00
     PROP_MODE_OFFSET      = 2912
 
-    def __init__(self, note_start=36, channel=9):
+    def __init__(self, note_start=36, channel=9, debug=False, wait_on_send=True):
         super().__init__("SMC-PAD Pocket-Private")
         self._synced = Event()
+        self._wait_on_send = wait_on_send
+        self._debug = debug
 
         # public properties
         self.preset = 0
@@ -79,8 +82,10 @@ class SMCPadPocket(DeviceController):
         self.preset = preset
 
     def led_off(self, pad, bank=None, preset=None):
-        pad, bank, preset = self._clean_fields(pad, bank, preset)
         self.set_rgb_led(pad, 0, 0, 0, bank, preset)
+
+    def set_led(self, pad):
+        self.set_rgb_led(pad, 20, 20, 20)
 
     def set_rgb_led(self, pad, r, g, b, bank=None, preset=None):
         # Message format:
@@ -145,7 +150,8 @@ class SMCPadPocket(DeviceController):
 
         self._synced.clear()
         self._send_sysex("41 00 00 00 02 00 00 00 00 00 01 00 00 73 01", self.DEVID_STAT)
-        self._synced.wait()
+        if not self._synced.wait(timeout=5):
+            print("WARNING: could not sync, status not received (timeout)")
 
     def _send_sysex(self, cmd, devid=DEVID_CTRL, debug=False):
         if isinstance(cmd, str):
@@ -153,20 +159,25 @@ class SMCPadPocket(DeviceController):
         elif isinstance(cmd, (list, tuple)):
             cmd = bytes(cmd)
         data = bytes(devid) + cmd
-        if debug:
-            print(f"SysEx:")
+        if debug or self._debug:
+            print(f"SysEx out:")
             hexdump(data)
         msg = mido.Message(type="sysex", data=data)
         self._port.send(msg)
 
         # NOTE: I see a problem when sending two messages too quickly, neither of them
         # arrived. Adding a little wait here appears to fix it.
-        time.sleep(0.001)
+        if self._wait_on_send:
+            time.sleep(0.001)
 
     def _recv_sysex(self, data):
         # Message format:
         # - DEVID[3] 01 01 00 00 02 00 00 00 00 00 01 00 00 20 01 58 11 00 00 00 00
         # - PRESET[1] CRC[2]
+
+        if self._debug:
+            print(f"SysEx in:")
+            hexdump(bytes(data))
 
         if data[3:8] == (1, 1, 0, 0, 2):
             self.preset = data[-3]
