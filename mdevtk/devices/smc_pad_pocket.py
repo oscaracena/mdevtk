@@ -31,7 +31,9 @@ class SMCPadPocket(DeviceController):
     PROP_TYPE_OFFSET      = 0x00
     PROP_MODE_OFFSET      = 2912
 
-    def __init__(self, note_start=36, channel=9, debug=False, wait_on_send=True):
+    def __init__(self, note_start=36, channel=9, debug=False, wait_on_send=True,
+            autoconnect=True):
+
         super().__init__("SMC-PAD Pocket-Private")
         self._synced = Event()
         self._wait_on_send = wait_on_send
@@ -42,13 +44,24 @@ class SMCPadPocket(DeviceController):
         self.bank = 0
 
         self.on_sysex(self.DEVID_STAT, self._recv_sysex)
+        if autoconnect:
+            self.connect(note_start, channel)
+
+    def connect(self, note_start: int, channel: int, ptype="note"):
         for col in range(4):
             for row in range(4):
                 pad = row * 4 + col
                 note = note_start + pad
-                self.on_note(
-                    channel=channel, note=note, cb="on_pad",
-                    pad=pad, row=row, col=col)
+                if ptype == "momentary":
+                    self.on_cc(
+                        channel=channel, controls=[note], cb="on_pad",
+                        pad=pad, row=row, col=col)
+                elif ptype == "note":
+                    self.on_note(
+                        channel=channel, note=note, cb="on_pad",
+                        pad=pad, row=row, col=col)
+                else:
+                    raise RuntimeError("Unsupported type")
 
     def change_bank(self, bank: int):
         # Message format:
@@ -110,15 +123,15 @@ class SMCPadPocket(DeviceController):
 
         self._send_sysex(cmd)
 
-    def set_pad_mode(self, pad, mode: str, preset=None):
+    def set_pad_mode(self, pad, mode: str, bank=None, preset=None):
         modes = {"pad": 0, "control": 1}
         assert mode in modes, f"mode must be one of {list(modes.keys())}"
-        self._set_property(pad, [modes.get(mode)], self.PROP_MODE_OFFSET, 0, preset)
+        self._set_property(pad, [modes.get(mode)], self.PROP_MODE_OFFSET, bank, preset)
 
-    def set_pad_type(self, pad, type: str, preset=None):
+    def set_pad_type(self, pad, type: str, bank=None, preset=None):
         types = {"note": 0, "cc-toggle": 1, "momentary": 2, "program": 3, "custom": 4}
         assert type in types, f"type must be one of {list(types.keys())}"
-        self._set_property(pad, [types.get(type)], self.PROP_TYPE_OFFSET, 0, preset)
+        self._set_property(pad, [types.get(type)], self.PROP_TYPE_OFFSET, bank, preset)
 
     def set_pad_note(self, pad, note, bank=None, preset=None):
         assert 0 <= note <= 0x7F, "note number should be in range [0, 127]"
@@ -187,9 +200,9 @@ class SMCPadPocket(DeviceController):
         bank = bank if bank is not None else self.bank
         preset = preset if preset is not None else self.preset
 
-        assert 0 <= preset <= 3, "preset should be in range [0, 3]"
-        assert 0 <= bank <= 6, "bank should be in range [0, 6]"
-        assert 0 <= pad <= 15, "pad should be in range [0, 5]"
+        assert 0 <= preset <= 3, f"preset ({preset}) should be in range [0, 3]"
+        assert 0 <= bank <= 6, f"bank ({bank}) should be in range [0, 6]"
+        assert 0 <= pad <= 15, f"pad ({pad}) should be in range [0, 15]"
 
         return pad, bank, preset
 
@@ -200,6 +213,7 @@ class SMCPadPocket(DeviceController):
         # 7: number of banks
         # 2916: distance between presets for PAD mode addressing
 
+        # print(f"PAD: {preset}.{bank}.{pad}, offset: {offset}")
         if offset == self.PROP_MODE_OFFSET:
             return offset + (2916 + 15) * preset + pad
         return offset + 19 * preset + (preset * 7 * 16 + bank * 16 + pad) * 26
